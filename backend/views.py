@@ -13,10 +13,10 @@ from drf_yasg import openapi
 
 class RegisterStudentView(APIView):
     @swagger_auto_schema(
-        operation_description="Register a new student",
+        operation_description="Register a new student or teacher",
         request_body=StudentSerializer,
         responses={
-            201: openapi.Response("Student registered successfully"),
+            201: openapi.Response("User registered successfully"),
             400: openapi.Response("Validation error"),
         },
     )
@@ -24,7 +24,7 @@ class RegisterStudentView(APIView):
         serializer = StudentSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "Student registered successfully"}, status=status.HTTP_201_CREATED)
+            return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -127,3 +127,33 @@ class VolunteerCandidateView(APIView):
             serializer.save()
             return Response({"message": "You have successfully volunteered as a candidate."}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        return Response({
+            "username": user.username, 
+            "name": user.name, 
+            "class_name": user.class_name,
+            "is_teacher": user.is_teacher
+        }, status=status.HTTP_200_OK)
+    
+
+def index(request):
+    return render(request, 'index.html')
+
+# Static Index views
+def login_view(request):
+    return render(request, 'login.html')
+
+def register_view(request):
+    return render(request, 'register.html')
+
+def test(request):
+    return render(request, 'test.html')
+
+def vote(request):
+    return render(request, 'vote.html')
+

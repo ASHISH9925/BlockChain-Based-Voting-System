@@ -20,6 +20,9 @@ from django.urls import path, include, re_path
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
+from django.conf import settings
+from django.conf.urls.static import static
+from backend import views as backend_views
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -32,9 +35,17 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
+    path("", backend_views.index, name="index"),
+    path("login", backend_views.login_view, name="login"),
+    path("register", backend_views.register_view, name="register"),
+    path("test", backend_views.test, name="test"),
+    path("vote", backend_views.vote, name="vote"),
     path("admin/", admin.site.urls),
     path("api/", include("backend.urls")),
     # re_path(r"^swagger(?P<format>\.json|\.yaml)$", schema_view.without_ui(cache_timeout=0), name="schema-json"),
     path("swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
     # path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])

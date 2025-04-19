@@ -80,3 +80,5 @@ yarn-error.log*
 # Secret keys
 *.pem
 *.key
+
+__archive__/

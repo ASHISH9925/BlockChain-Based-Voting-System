@@ -1,0 +1,115 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract ClassVoting {
+    /*----------------------------------------------------------
+     *  Storage
+     *---------------------------------------------------------*/
+
+    // class ID => candidate name => votes
+    mapping(string => mapping(string => uint256)) private _votes;
+
+    // class ID => list of candidate names
+    mapping(string => string[]) private _candidatesPerClass;
+
+    // voter hash => class ID => has voted?
+    mapping(bytes32 => mapping(string => bool)) private _hasVoted;
+
+    // voter hash => registered?
+    mapping(bytes32 => bool) public validVoters;
+
+    // class ID => whether candidates have been registered
+    mapping(string => bool) private _classRegistered;
+
+    /*----------------------------------------------------------
+     *  Constructor (empty)
+     *---------------------------------------------------------*/
+
+    constructor() {}
+
+    /*----------------------------------------------------------
+     *  Admin Functions
+     *---------------------------------------------------------*/
+
+    /** Register candidates for a new class ID. Only callable once per class. */
+    function addClassCandidates(string memory classId, string[] memory candidates) external {
+        require(!_classRegistered[classId], "Class already registered");
+        require(candidates.length > 0, "Class must have candidates");
+
+        for (uint256 i; i < candidates.length; ++i) {
+            _candidatesPerClass[classId].push(candidates[i]);
+        }
+
+        _classRegistered[classId] = true;
+    }
+
+    /** Register a list of voters by their plain-text voter IDs. */
+    function addVoters(string[] memory voterIds) external {
+        for (uint256 i; i < voterIds.length; ++i) {
+            bytes32 h = keccak256(abi.encodePacked(voterIds[i]));
+            validVoters[h] = true;
+        }
+    }
+
+    /*----------------------------------------------------------
+     *  Public read-only getters
+     *---------------------------------------------------------*/
+
+    function candidatesOf(string memory classId)
+        external
+        view
+        returns (string[] memory)
+    {
+        return _candidatesPerClass[classId];
+    }
+
+    function getVotes(string memory classId, string memory candidate)
+        external
+        view
+        returns (uint256)
+    {
+        _requireValidCandidate(classId, candidate);
+        return _votes[classId][candidate];
+    }
+
+    /*----------------------------------------------------------
+     *  Voting
+     *---------------------------------------------------------*/
+
+    function vote(
+        string memory classId,
+        string memory candidate,
+        string memory voterId
+    ) external {
+        _requireValidCandidate(classId, candidate);
+
+        bytes32 voterHash = keccak256(abi.encodePacked(voterId));
+        require(validVoters[voterHash], "Not a registered voter");
+        require(!_hasVoted[voterHash][classId], "Already voted in this class");
+
+        _hasVoted[voterHash][classId] = true;
+        _votes[classId][candidate] += 1;
+    }
+
+    /*----------------------------------------------------------
+     *  Internal helpers
+     *---------------------------------------------------------*/
+
+    function _requireValidCandidate(
+        string memory classId,
+        string memory candidate
+    ) internal view {
+        string[] storage list = _candidatesPerClass[classId];
+        require(list.length > 0, "Class does not exist");
+
+        for (uint256 i; i < list.length; ++i) {
+            if (
+                keccak256(abi.encodePacked(list[i])) ==
+                keccak256(abi.encodePacked(candidate))
+            ) {
+                return;
+            }
+        }
+        revert("Invalid candidate for class");
+    }
+}

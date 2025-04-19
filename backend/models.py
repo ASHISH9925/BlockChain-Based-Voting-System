@@ -22,6 +22,7 @@ class Student(AbstractBaseUser):
     class_name = models.CharField(max_length=50) 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+    is_teacher = models.BooleanField(default=False)
 
     objects = StudentManager()
 

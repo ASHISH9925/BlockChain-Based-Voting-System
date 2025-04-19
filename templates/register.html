@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register - Blockchain Voting System</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        background-color: #f7f9fc;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <div
+      class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+    >
+      <div class="max-w-md w-full bg-white rounded-xl shadow-lg p-8 space-y-8">
+        <div>
+          <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Create your account
+          </h2>
+          <p class="mt-2 text-center text-sm text-gray-600">
+            Join our blockchain-based voting system
+          </p>
+        </div>
+        <form class="mt-8 space-y-6" id="registerForm">
+          <div class="rounded-md shadow-sm space-y-4">
+            <div>
+              <label for="name" class="block text-sm font-medium text-gray-700"
+                >Full Name</label
+              >
+              <input
+                id="name"
+                name="name"
+                type="text"
+                required
+                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label for="prn" class="block text-sm font-medium text-gray-700"
+                >PRN (Permanent Registration Number)</label
+              >
+              <input
+                id="prn"
+                name="username"
+                type="text"
+                required
+                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label
+                for="password"
+                class="block text-sm font-medium text-gray-700"
+                >Password</label
+              >
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label
+                for="class_name"
+                class="block text-sm font-medium text-gray-700"
+                >Class</label
+              >
+              <input
+                id="class_name"
+                name="class_name"
+                type="text"
+                required
+                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label for="type" class="block text-sm font-medium text-gray-700"
+                >User Type</label
+              >
+              <select
+                id="type"
+                name="type"
+                required
+                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              >
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Register
+            </button>
+          </div>
+        </form>
+
+        <div class="text-center text-sm">
+          <a
+            href="login.html"
+            class="font-medium text-indigo-600 hover:text-indigo-500"
+          >
+            Already have an account? Sign in
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("registerForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const formData = {
+            username: document.getElementById("prn").value,
+            password: document.getElementById("password").value,
+            name: document.getElementById("name").value,
+            class_name: document.getElementById("class_name").value,
+            is_teacher: document.getElementById("type").value === "teacher",
+          };
+
+          fetch("http://127.0.0.1:8000/api/register/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          })
+            .then((response) => {
+              if (response.status === 201) {
+                alert("Registration successful! You can now login.");
+                window.location.href = "login";
+                return;
+              }
+              return response.json();
+            })
+            .then((data) => {
+              if (data && data.error) {
+                alert(`Registration failed: ${data.error}`);
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("Registration failed. Please try again.");
+            });
+        });
+    </script>
+  </body>
+</html>
